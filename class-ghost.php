@@ -3,19 +3,23 @@
  * WordPress to Ghost exporter
  *
  * @package   Ghost
- * @author	  Ghost Foundation
+ * @author    Ghost Foundation
  * @license   GPL-2.0+
- * @link	  http://ghost.org
+ * @link      http://ghost.org
  * @copyright 2014 Ghost Foundation
  */
 
+function generate_video_embed($video_url) {
+    if (preg_match('/youtube\.com.*v=([\w\-]+)/', $video_url, $matches) || preg_match('/youtu\.be\/([\w\-]+)/', $video_url, $matches)) {
+        $video_id = $matches[1];
+        return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_id . '" frameborder="0" allowfullscreen></iframe>';
+    } elseif (preg_match('/vimeo\.com\/(\d+)/', $video_url, $matches)) {
+        $video_id = $matches[1];
+        return '<iframe width="560" height="315" src="https://player.vimeo.com/video/' . $video_id . '" frameborder="0" allowfullscreen></iframe>';
+    }
+    return '';
+}
 
-/**
- * Plugin class.
- *
- * @package Ghost
- * @author  Ghost Foundation
- */
 class Ghost {
 
 	/**
@@ -334,8 +338,18 @@ class Ghost {
 					$image_caption = wp_get_attachment_caption( $image_id );
 				}
 
+                // Retrieve the video URL from post meta
+                $video_url = get_post_meta( $post->ID, 'powerkit_post_format_video', true );
+                $video_embed = generate_video_embed($video_url);
+
 				// Get the post content, with filters applied, as if it were used in a template file
 				$post_content = apply_filters( 'the_content', $post->post_content );
+
+				
+                // Prepend the video embed code to the post content if it exists
+                if (!empty($video_embed)) {
+                    $post_content = $video_embed . $post_content;
+                }
 
 				// Change the absolute image URLs to be relative, with the directory structure
 				$corrected_post_content = str_replace( get_site_url() .'/wp-content/uploads', '/' . $this->ghost_image_base, $post_content );
