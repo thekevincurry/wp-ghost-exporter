@@ -1,4 +1,4 @@
-##Post Meta Video Inclusion
+# Post Meta Video Inclusion
 
 My wordpress theme utilized a post meta for video embeds. This post meta did not come across in the existing ghost exporter. This updated version pulls over the "powerkit_post_format_video" post meta in my theme and wraps it in an embed appropriate for Vimeo or Youtube.
 
